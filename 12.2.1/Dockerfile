@@ -68,7 +68,7 @@ RUN chmod a+xr /u01 && \
     echo oracle:oracle | chpasswd && \
     cd /u01 && $JAVA_HOME/bin/jar xf /u01/$FMW_PKG && cd -
 
-RUN su -c "$JAVA_HOME/bin/java -jar /u01/$FMW_JAR -silent -debug -logLevel finest -responseFile /u01/install.file -invPtrLoc /u01/oraInst.loc -jreLoc $JAVA_HOME -ignoreSysPrereqs -force -novalidation ORACLE_HOME=$ORACLE_HOME" - oracle
+RUN su -c "$JAVA_HOME/bin/java -jar /u01/$FMW_JAR -silent -debug -responseFile /u01/install.file -invPtrLoc /u01/oraInst.loc -jreLoc $JAVA_HOME -ignoreSysPrereqs -force -novalidation ORACLE_HOME=$ORACLE_HOME" - oracle
 
 RUN rm /u01/$FMW_JAR /u01/$FMW_PKG /u01/oraInst.loc /u01/install.file && \
     find /u01 -user oracle -exec chmod a+rwX /u01 {} ';'
