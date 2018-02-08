@@ -21,13 +21,16 @@
 # 
 # The resulting image of this Dockerfile contains a empty Oracle WebLogic Domain.
 #
-FROM rhel7-OracleJDK
+FROM rsoares/rhel7-oraclejdk8
 
 MAINTAINER Robert Baumgartner <robert.baumgartner@redhat.com>
 
 # WLS Configuration (editable during build time)
 # ------------------------------
 ARG ADMIN_PASSWORD
+ARG FMW_BASEURL
+ARG FMW_VERSION
+ARG FMW_QUICK=false
 
 # Environment variables required for this build (do NOT change)
 # -------------------------------------------------------------
@@ -50,6 +53,7 @@ ENV FMW_PKG=fmw_${FMW_VERSION}_wls${FMW_QUICK:+_quick}_Disk1_1of1.zip \
 # Copy packages
 # -------------
 ADD ${FMW_BASEURL}/${FMW_PKG} /u01/
+#COPY ${FMW_PKG} /u01/
 COPY install.file oraInst.loc /u01/
 COPY container-scripts/createAndStartEmptyDomain.sh container-scripts/create-wls-domain.py /u01/oracle/
 
@@ -62,9 +66,11 @@ RUN chmod a+xr /u01 && \
     useradd -b /u01 -M -s /bin/bash oracle && \
     chown oracle:oracle -R /u01 && \
     echo oracle:oracle | chpasswd && \
-    cd /u01 && $JAVA_HOME/bin/jar xf /u01/$FMW_PKG && cd - && \
-    su -c "$JAVA_HOME/bin/java -jar /u01/$FMW_JAR -silent -responseFile /u01/install.file -invPtrLoc /u01/oraInst.loc -jreLoc $JAVA_HOME -ignoreSysPrereqs -force -novalidation ORACLE_HOME=$ORACLE_HOME INSTALL_TYPE=\"WebLogic Server\"" - oracle && \
-    rm /u01/$FMW_JAR /u01/$FMW_PKG /u01/oraInst.loc /u01/install.file && \
+    cd /u01 && $JAVA_HOME/bin/jar xf /u01/$FMW_PKG && cd -
+
+RUN su -c "$JAVA_HOME/bin/java -jar /u01/$FMW_JAR -silent -debug -logLevel finest -responseFile /u01/install.file -invPtrLoc /u01/oraInst.loc -jreLoc $JAVA_HOME -ignoreSysPrereqs -force -novalidation ORACLE_HOME=$ORACLE_HOME" - oracle
+
+RUN rm /u01/$FMW_JAR /u01/$FMW_PKG /u01/oraInst.loc /u01/install.file && \
     find /u01 -user oracle -exec chmod a+rwX /u01 {} ';'
 
 # Expose Node Manager default port, and also default for admin and managed server 

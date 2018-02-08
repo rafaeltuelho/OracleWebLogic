@@ -23,7 +23,7 @@ items:
     source:
       type: Git
       git:
-        uri: https://github.com/rbaumgar/OracleWebLogic.git
+        uri: https://github.com/rafaeltuelho/OracleWebLogic.git
       contextDir: 12.2.1
     strategy:
       dockerStrategy:
